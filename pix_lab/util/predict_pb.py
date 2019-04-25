@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
 from scipy import misc
-from pix_lab.util.util import load_graph
+from util import load_graph
 
 class Predict_pb(object):
     """
@@ -15,10 +15,9 @@ class Predict_pb(object):
         :param net: the arunet instance to train
 
         """
-    def __init__(self, path_to_pb, image_paths, output_paths, scale=0.33, mode='L'):
+    def __init__(self, path_to_pb, image_paths, scale=0.33, mode='L'):
         self.graph = load_graph(path_to_pb)
         self.img_paths = image_paths
-        self.output_paths = output_paths
         self.scale = scale
         self.mode = mode
 
@@ -28,6 +27,7 @@ class Predict_pb(object):
         session_conf = tf.ConfigProto()
         session_conf.gpu_options.visible_device_list = gpu_device
 
+        outputs = []
         with tf.Session(graph=self.graph, config=session_conf) as sess:
             x = self.graph.get_tensor_by_name('inImg:0')
             predictor = self.graph.get_tensor_by_name('output:0')
@@ -42,9 +42,9 @@ class Predict_pb(object):
                 aPred = sess.run(predictor,
                                  feed_dict={x: batch_x})
 
-                np.save(self.output_paths[step], aPred)
+                outputs.append(aPred)
 
-            return None
+        return outputs
 
     def load_img(self, path, scale, mode):
         aImg = misc.imread(path, mode=mode)
