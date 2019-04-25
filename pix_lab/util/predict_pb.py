@@ -15,14 +15,13 @@ class Predict_pb(object):
         :param net: the arunet instance to train
 
         """
-    def __init__(self, path_to_pb, image_paths, scale=0.33, mode='L'):
+    def __init__(self, path_to_pb, scale=0.33, mode='L'):
         self.graph = load_graph(path_to_pb)
-        self.img_paths = image_paths
         self.scale = scale
         self.mode = mode
 
-    def predict(self, gpu_device="0"):
-        val_size = len(self.img_paths)
+    def predict(self, img_paths, gpu_device="0"):
+        val_size = len(img_paths)
 
         session_conf = tf.ConfigProto()
         session_conf.gpu_options.visible_device_list = gpu_device
@@ -33,7 +32,7 @@ class Predict_pb(object):
             predictor = self.graph.get_tensor_by_name('output:0')
 
             for step in range(0, val_size):
-                aImgPath = self.img_paths[step]
+                aImgPath = img_paths[step]
 
                 batch_x = self.load_img(aImgPath, self.scale, self.mode)
                 # h: batch_x.shape[1], w: batch_x.shape[2]
